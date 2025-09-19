@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import { TrendingUp, Loader2 } from "lucide-react"
+import { API_BASE } from "../config"
 import "./predictWinner.css"
 
 const F1_DRIVERS = [
@@ -59,7 +60,7 @@ export function PredictWinner({ onSubmit }) {
     setIsLoading(true)
     try {
       const driverRef = UI_TO_REF[selectedDriver] || selectedDriver.toLowerCase()
-      const res = await fetch("http://127.0.0.1:8000/predict/winner", {
+      const res = await fetch(`${API_BASE}/predict/winner`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

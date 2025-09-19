@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import { Trophy, Loader2 } from "lucide-react"
+import { API_BASE } from "../config"
 import "./raceOrder.css"
 
 export function RaceOrder({ onSubmit }) {
@@ -10,7 +11,7 @@ export function RaceOrder({ onSubmit }) {
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
-      const res = await fetch("http://127.0.0.1:8000/predict/race-order", {
+      const res = await fetch(`${API_BASE}/predict/race-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ year: 2025, round: 16, circuitId: 14, use_quali: true }),
