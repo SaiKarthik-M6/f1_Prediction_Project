@@ -5,10 +5,6 @@ import { ArrowLeft } from "lucide-react"
 import "./raceOrderResults.css"
 
 
-// Top of file (below imports)
-const refToName = (ref) =>
-  ref ? ref.split("_").map(w => w[0].toUpperCase() + w.slice(1)).join(" ") : ""
-
 export function RaceOrderResult({ results = [], onMakeAnother }) {
   if (!results.length) {
     return React.createElement("div", { className: "race-order-result-container" },
@@ -42,7 +38,8 @@ export function RaceOrderResult({ results = [], onMakeAnother }) {
         React.createElement("div", { className: "header-cell score" }, "SCORE"),
       ),
       results.map((r, index) => {
-        const name = refToName(r.driverRef)
+        const name = r.name || r.driverRef
+        const team = r.team || ""
         const initials = name.split(" ").map(n => n[0]).join("")
         return React.createElement(
           "div",
@@ -56,7 +53,7 @@ export function RaceOrderResult({ results = [], onMakeAnother }) {
             React.createElement("span", { className: "driver-name" }, name)
           ),
           React.createElement("div", { className: "cell position" }, `P${r.proj_rank}`),
-          React.createElement("div", { className: "cell team" }, "F1 Team"), // You can map this to actual teams
+          React.createElement("div", { className: "cell team" }, team),
           React.createElement("div", { className: "cell score" }, (r.predicted_position.toFixed?.(3) ?? r.predicted_position).toString())
         )
       })

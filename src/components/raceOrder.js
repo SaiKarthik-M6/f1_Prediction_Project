@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { Trophy, Loader2 } from "lucide-react"
-import { API_BASE } from "../config"
+import { predictRaceOrder } from "../api"
 import "./raceOrder.css"
 
 export function RaceOrder({ onSubmit }) {
@@ -11,15 +11,12 @@ export function RaceOrder({ onSubmit }) {
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/predict/race-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ year: 2025, round: 16, circuitId: 14, use_quali: true }),
-      })
-      const data = await res.json()
-      // wait 5 seconds before showing results
+      const data = await predictRaceOrder()
+      // short pause before showing results
       await new Promise((resolve) => setTimeout(resolve, 3000))
-      onSubmit(data.results)   // <-- send full list up
+      onSubmit(data.results || [])   // <-- send full list up
+    } catch (e) {
+      alert(e.message)
     } finally {
       setIsLoading(false)
     }

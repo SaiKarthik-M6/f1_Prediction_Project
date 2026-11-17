@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/index.py": {
+      "excludeFiles": "{node_modules,.venv,src,public,build,__pycache__}/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    }
+  ]
+}

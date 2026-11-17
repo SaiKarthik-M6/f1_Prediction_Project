@@ -2,56 +2,12 @@
 
 import React, { useState } from "react"
 import { TrendingUp, Loader2 } from "lucide-react"
-import { API_BASE } from "../config"
+import { predictDriver } from "../api"
 import "./predictWinner.css"
 
-const F1_DRIVERS = [
-  "Max Verstappen",
-  "Lando Norris",
-  "Charles Leclerc",
-  "Lewis Hamilton",
-  "George Russell",
-  "Carlos Sainz",
-  "Oscar Piastri",
-  "Fernando Alonso",
-  "Lance Stroll",
-  "Esteban Ocon",
-  "Pierre Gasly",
-  "Alexander Albon",
-  "Yuki Tsunoda",
-  "Liam Lawson",
-  "Nico Hulkenberg",
-  "Kevin Magnussen",
-  "Gabriel Bortoleto",
-  "Issack Hadjar",
-  "Kimi Antonelli",
-  "Ollie Bearman",
-]
-
-const UI_TO_REF = {
-    "Max Verstappen": "verstappen",
-    "Lando Norris": "norris",
-    "Charles Leclerc": "leclerc",
-    "Lewis Hamilton": "hamilton",
-    "George Russell": "russell",
-    "Carlos Sainz": "sainz",
-    "Oscar Piastri": "piastri",
-    "Fernando Alonso": "alonso",
-    "Lance Stroll": "stroll",
-    "Esteban Ocon": "ocon",
-    "Pierre Gasly": "gasly",
-    "Alexander Albon": "albon",
-    "Yuki Tsunoda": "tsunoda",
-    "Liam Lawson": "lawson",
-    "Nico Hulkenberg": "hulkenberg",
-    "Ollie Bearman": "bearman",
-    "Gabriel Bortoleto": "bortoleto",
-    "Issack Hadjar": "hadjar",
-    "Kimi Antonelli": "antonelli",
-  };
-
-export function PredictWinner({ onSubmit }) {
-  const [selectedDriver, setSelectedDriver] = useState("")
+// lineup: drivers expected in the next race, from the API
+export function PredictWinner({ lineup = [], onSubmit }) {
+  const [selectedDriver, setSelectedDriver] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
@@ -59,36 +15,12 @@ export function PredictWinner({ onSubmit }) {
     if (!selectedDriver) return
     setIsLoading(true)
     try {
-      const driverRef = UI_TO_REF[selectedDriver] || selectedDriver.toLowerCase()
-      const res = await fetch(`${API_BASE}/predict/winner`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          driver: driverRef,
-          year: 2025,
-          round: 16,
-          circuitId: 14,
-          use_quali: true,
-        }),
-      })
-      const data = await res.json()
-      // wait 5 seconds before showing results
+      const data = await predictDriver(selectedDriver.driverRef)
+      // short pause before showing results
       await new Promise((resolve) => setTimeout(resolve, 3000))
-      if (data.error) {
-        alert(data.error)
-      } else {
-        // Test logging - remove this later
-        console.log("Driver:", selectedDriver)
-        console.log("Driver Ref:", driverRef)
-        console.log("Predicted Position:", data.predicted_position)
-        console.log("Projected Rank:", data.proj_rank)
-        console.log("Full API Response:", data)
-        
-        onSubmit(data) // keep your current UX; optionally pass data
-      }
+      onSubmit(data)
     } catch (e) {
-      console.error(e)
-      alert("Failed to reach prediction service.")
+      alert(e.message)
     } finally {
       setIsLoading(false)
     }
@@ -116,21 +48,21 @@ export function PredictWinner({ onSubmit }) {
             className: "select-trigger",
             onClick: () => setIsDropdownOpen(!isDropdownOpen),
           },
-          selectedDriver || "Enter Driver Name",
+          selectedDriver ? selectedDriver.name : (lineup.length ? "Enter Driver Name" : "Loading drivers..."),
         ),
         isDropdownOpen &&
           React.createElement(
             "div",
             { className: "select-dropdown" },
-            F1_DRIVERS.map((driver) =>
+            lineup.map((driver) =>
               React.createElement(
                 "div",
                 {
-                  key: driver,
+                  key: driver.driverRef,
                   className: "select-item",
                   onClick: () => handleDriverSelect(driver),
                 },
-                driver,
+                `${driver.name} · ${driver.team}`,
               ),
             ),
           ),
